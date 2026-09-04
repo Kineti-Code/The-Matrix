@@ -60,7 +60,7 @@ def run():
             operation = input("Please input a row operation to perform on the matrix: ")
             matrix.parse_text(operation)
             print(matrix)
-        except SyntaxError as error:
+        except (SyntaxError, Matrix.OperationError) as error:
             print(f"Error occured while performing operation '{operation}'. Please re-input operation. {error}")
 
 

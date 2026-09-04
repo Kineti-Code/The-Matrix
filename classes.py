@@ -1,7 +1,9 @@
 import re
 
-
 class Matrix():
+    class OperationError(ValueError):
+        pass
+
     @staticmethod
     def _validate_construction(rows: int, columns: int):
         if rows == 1 and columns == 1:
@@ -16,14 +18,6 @@ class Matrix():
             if len(row) != self.num_columns:
                 raise ValueError("Num columns not equal to parameter 'num_columns'!")
 
-    def validate_row(self, row_idx):
-        if row_idx < 0 or row_idx >= self.num_rows:
-            raise IndexError("Index does not correspond to a valid row!")
-
-    def validate_column(self, column_idx):
-        if column_idx < 0 or column_idx >= self.num_columns:
-            raise IndexError("Index does not correspond to a valid column!")
-
     def __init__(self, num_rows, num_columns, values):
         self._validate_construction(num_rows, num_columns)
 
@@ -33,15 +27,6 @@ class Matrix():
 
         self._validate_values()
 
-    def to_vector(self, column: int):
-        self.validate_column(column)
-
-        values = []
-        for row in self.values:
-            values.append(row[column])
-
-        return Vector(values)
-
     def __str__(self):        
         return "\n".join([" ".join([f"{num:g}" for num in row]) for row in self.values])
 
@@ -49,6 +34,10 @@ class Matrix():
     # Replacement - add multiple of one row to another
     # Interchange - swap two rows
     # Scale - Multiply each column in a row by a constant
+
+    def validate_row(self, row_idx):
+        if row_idx < 0 or row_idx >= len(self.values):
+            raise IndexError("Index does not correspond to a valid row!")
 
     # 2r1 -> r1
     def scale(self, row, scalar):
@@ -105,7 +94,7 @@ class Matrix():
             row_to = int(match.group(4)) - 1
             
             if row_added_to != row_to:
-                raise ValueError("Row being operated on must come after the plus sign!")
+                raise self.OperationError("Row being operated on must come after the plus sign!")
 
             self.replace(row_from, row_to, scalar)
             print(f"Replaced row {row_to+1} with {scalar} * row {row_from+1} + row {row_to+1}")
@@ -121,7 +110,7 @@ class Matrix():
             row_to = int(match.group(3)) - 1
             
             if row_from != row_to:
-                raise ValueError("Scaled row must match the destination row!")
+                raise self.OperationError("Scaled row must match the destination row!")
                 
             self.scale(row_from, scalar)
             print(f"Scaled row {row_from+1} by {scalar}")
@@ -129,39 +118,3 @@ class Matrix():
         else:
             raise SyntaxError("Invalid syntax detected! Valid operations are replacement, interchange, and scaling.")
 
-
-class Vector():
-    def __init__(self, values: list):
-        self.values = values
-
-    @staticmethod
-    def is_in_span(self, matrix: Matrix):
-        if len(self.values) != len(matrix.values):
-            raise ValueError(f"Vector length must match matrix row count ({len(self.values)} != ({len(matrix.values)}))")
-
-        # see if matrix has solution
-        # if it doesn't then return false
-        # otherwise return true
-        
-
-    def to_2d_array(self):
-        return [[value] for value in self.values]
-
-    def to_matrix(self):
-        array = self.to_2d_array()
-
-        return Matrix(
-            self.num_components,
-            1,
-            array
-        )
-
-    def __str__(self):
-        vector_str = "<"
-
-        for i in range(len(self.values)):
-            value = self.values[i]
-            suffix = ", " if i != len(self.values) - 1 else ">"
-            vector_str += value + suffix
-
-        return vector_str
